@@ -1,126 +1,174 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snapspy - Private Tool</title>
+    <title>Snapspy v4.0 - Secure Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
         
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FFFC00; /* Snapchat Yellow */
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #050505;
+            color: white;
+            overflow-x: hidden;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        .bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            opacity: 0.15;
+            z-index: -1;
+            filter: grayscale(1);
         }
 
-        .loading-bar {
-            width: 0%;
-            height: 100%;
-            background: #000;
-            transition: width 0.5s ease-in-out;
+        .neon-border {
+            box-shadow: 0 0 15px rgba(255, 252, 0, 0.3);
+            border: 1px solid rgba(255, 252, 0, 0.5);
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .scanner-line {
+            width: 100%;
+            height: 2px;
+            background: #FFFC00;
+            position: absolute;
+            top: 0;
+            box-shadow: 0 0 15px #FFFC00;
+            animation: scan 3s linear infinite;
+            z-index: 10;
         }
-        .pulse { animation: pulse 1.5s infinite; }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, #000, #333, #000);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-6">
 
-    <div class="mb-8 text-center">
-        <i class="fab fa-snapchat text-6xl text-black"></i>
-        <h1 class="text-3xl font-extrabold text-black mt-2 tracking-tighter">SNAPSPY <span class="bg-black text-white px-2 rounded">PRO</span></h1>
-    </div>
+    <div class="fixed inset-0 bg-gradient-to-b from-transparent to-black pointer-events-none"></div>
 
-    <div class="w-full max-w-md">
-        <div id="main-box" class="glass-card p-8 transition-all duration-500">
-            
-            <div id="step-1">
-                <h2 class="text-xl font-bold text-center mb-6 text-gray-800">Enter Snapchat Username</h2>
-                <div class="relative mb-6">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                        <i class="fas fa-at"></i>
-                    </span>
-                    <input type="text" id="username" placeholder="Username..." 
-                        class="w-full pl-10 pr-4 py-4 border-2 border-gray-100 rounded-xl focus:border-black outline-none transition-all font-semibold">
+    <div class="relative w-full max-w-lg z-10">
+        
+        <div id="app-card" class="bg-[#111] rounded-3xl overflow-hidden neon-border relative">
+            <div id="scanner" class="hidden scanner-line"></div>
+
+            <div class="p-8 text-center border-b border-white/5 bg-[#151515]">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-[#FFFC00] rounded-2xl mb-4 rotate-3 transform hover:rotate-0 transition-all duration-500">
+                    <i class="fab fa-snapchat text-4xl text-black"></i>
                 </div>
-                
-                <button onclick="startProcess()" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-xl hover:opacity-90 transition-all active:scale-95">
-                    CONTINUE
-                </button>
+                <h1 class="text-2xl font-bold tracking-widest text-white uppercase">Snapspy <span class="text-[#FFFC00]">v4.0</span></h1>
+                <p class="text-gray-500 text-xs mt-1 uppercase tracking-tighter">Remote Monitoring Interface</p>
             </div>
 
-            <div id="step-2" class="hidden text-center py-4">
-                <h2 id="status-text" class="text-lg font-bold mb-4 text-black pulse">Connecting to Servers...</h2>
-                <div class="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
-                    <div id="progress" class="loading-bar"></div>
+            <div class="p-8">
+                <div id="initial-ui">
+                    <div class="space-y-4 mb-8">
+                        <div class="relative">
+                            <label class="text-[10px] uppercase text-gray-500 font-bold ml-1 mb-2 block">Target Username</label>
+                            <input type="text" id="target" placeholder="e.g. jared_22" 
+                                class="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-5 py-4 focus:outline-none focus:border-[#FFFC00] transition-all font-mono text-yellow-400">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-[#151515] p-3 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition">
+                                <i class="fas fa-comment-dots text-[#FFFC00] mb-2"></i>
+                                <p class="text-[10px] font-bold">MESSAGES</p>
+                            </div>
+                            <div class="bg-[#151515] p-3 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition">
+                                <i class="fas fa-camera text-[#FFFC00] mb-2"></i>
+                                <p class="text-[10px] font-bold">PRIVATE SNAPS</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="launchExploit()" class="w-full bg-[#FFFC00] text-black font-black py-5 rounded-xl text-lg hover:shadow-[0_0_30px_rgba(255,252,0,0.4)] transition-all active:scale-95">
+                        START HACKING
+                    </button>
                 </div>
-                <div id="log-text" class="text-xs text-gray-500 font-mono h-12 overflow-hidden"></div>
+
+                <div id="processing-ui" class="hidden">
+                    <div class="flex flex-col items-center justify-center py-10">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFFC00] mb-6"></div>
+                        <p id="status-text" class="text-[#FFFC00] font-mono text-sm uppercase tracking-widest">Initializing...</p>
+                        <div class="w-full bg-white/5 h-1 mt-6 rounded-full overflow-hidden">
+                            <div id="bar" class="h-full bg-[#FFFC00] transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div id="console" class="w-full mt-6 bg-black p-4 rounded-lg font-mono text-[10px] text-green-500 h-32 overflow-hidden leading-relaxed">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="mt-8 grid grid-cols-3 gap-4 text-center opacity-60">
-            <div>
-                <i class="fas fa-user-secret text-black mb-1"></i>
-                <p class="text-[10px] font-bold uppercase">Anonymous</p>
+        <div class="mt-6 flex justify-between px-4">
+            <div class="text-left">
+                <span class="block text-white font-bold text-xs">STATUS</span>
+                <span class="text-green-500 text-[10px] animate-pulse">● SERVERS ONLINE</span>
             </div>
-            <div>
-                <i class="fas fa-shield-alt text-black mb-1"></i>
-                <p class="text-[10px] font-bold uppercase">Encrypted</p>
-            </div>
-            <div>
-                <i class="fas fa-bolt text-black mb-1"></i>
-                <p class="text-[10px] font-bold uppercase">Fast Server</p>
+            <div class="text-right">
+                <span class="block text-white font-bold text-xs">CONNECTED</span>
+                <span class="text-gray-500 text-[10px]">1,402 USERS</span>
             </div>
         </div>
     </div>
 
     <script>
-        function startProcess() {
-            const user = document.getElementById('username').value;
-            if(!user) return alert('Please enter a username');
+        function launchExploit() {
+            const target = document.getElementById('target').value;
+            if(!target) return alert('Username required');
 
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.remove('hidden');
+            document.getElementById('initial-ui').classList.add('hidden');
+            document.getElementById('processing-ui').classList.remove('hidden');
+            document.getElementById('scanner').classList.remove('hidden');
 
-            const status = document.getElementById('status-text');
-            const progress = document.getElementById('progress');
-            const log = document.getElementById('log-text');
+            const consoleBox = document.getElementById('console');
+            const statusText = document.getElementById('status-text');
+            const bar = document.getElementById('bar');
 
-            const steps = [
-                {p: 20, t: 'Searching for user @' + user + '...', l: 'Handshaking with API...'},
-                {p: 45, t: 'User Found!', l: 'Extracting private packets...'},
-                {p: 70, t: 'Bypassing Security...', l: 'SSL Encryption bypass... OK'},
-                {p: 90, t: 'Generating Report...', l: 'Compiling logs and media...'},
-                {p: 100, t: 'Human Verification Required', l: 'Finalizing...'}
+            const logs = [
+                "Locating cloud server...",
+                "Searching for user: " + target,
+                "User metadata found (ID: 8829-AX)",
+                "Establishing secure tunnel...",
+                "Bypassing 2FA handshake...",
+                "Downloading media packets...",
+                "Compiling data report...",
+                "Finalizing encryption..."
             ];
 
-            let current = 0;
-            const interval = setInterval(() => {
-                if(current < steps.length) {
-                    progress.style.width = steps[current].p + '%';
-                    status.innerText = steps[current].t;
-                    log.innerHTML += '> ' + steps[current].l + '<br>';
-                    current++;
+            let i = 0;
+            const timer = setInterval(() => {
+                if(i < logs.length) {
+                    let p = Math.floor(((i+1)/logs.length) * 100);
+                    bar.style.width = p + "%";
+                    statusText.innerText = logs[i];
+                    consoleBox.innerHTML += `<div>[SYSTEM]: ${logs[i]}</div>`;
+                    consoleBox.scrollTop = consoleBox.scrollHeight;
+                    i++;
                 } else {
-                    clearInterval(interval);
-                    // Hna fin katzid l-offer link dylk
+                    clearInterval(timer);
                     setTimeout(() => {
-                        alert('Final Step: Complete a quick offer to view the data.');
-                        window.location.href = "https://your-offer-link.com"; 
+                        window.location.href = "https://your-cpa-link.com"; // Beddel hada
                     }, 1000);
                 }
-            }, 2000);
+            }, 1500);
         }
     </script>
 </body>
