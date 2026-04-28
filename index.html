@@ -3,243 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnapSpying - Monitor Safely</title>
+    <title>SnapSpying - Private Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        :root {
-            --bg-main: #000000;
-            --card-bg: #1c1c1e;
-            --text-main: #ffffff;
-            --text-dim: #8e8e93;
-            --border: #2c2c2e;
-        }
-
-        .light-mode {
-            --bg-main: #f2f2f7;
-            --card-bg: #ffffff;
-            --text-main: #000000;
-            --text-dim: #636366;
-            --border: #d1d1d6;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .glass-input {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-        }
-
-        .action-card {
-            background: var(--card-bg);
-            border-radius: 14px;
-            transition: transform 0.2s active;
-        }
-
-        .bottom-sheet {
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .bottom-sheet.active {
-            transform: translateY(0);
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: #ffd500;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .privacy-modal {
-            background: var(--card-bg);
-            color: var(--text-main);
-        }
+        :root { --bg: #000; --card: #1c1c1e; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
+        .light { --bg: #f2f2f7; --card: #fff; --text: #000; --dim: #636366; --border: #d1d1d6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; overflow-x: hidden; }
+        .sheet { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sheet.active { transform: translateY(0); }
+        .bar-fill { height: 100%; background: #ffd500; width: 0%; transition: width 0.4s; }
+        .action-item { background: var(--card); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
+        .action-item:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="flex flex-col items-center pt-4 px-4 min-h-screen">
+<body class="flex flex-col items-center px-5 pt-4">
 
     <header class="w-full max-w-md flex justify-between items-center py-4">
-        <h1 class="text-[22px] font-bold tracking-tight">SnapSpying</h1>
-        <div class="flex items-center gap-5 text-[15px] font-medium">
-            <button onclick="togglePrivacy()" class="text-gray-500 hover:text-gray-300">Privacy</button>
-            <button onclick="toggleTheme()" class="text-gray-500 text-xl">
-                <i id="theme-icon" class="fas fa-moon"></i>
-            </button>
+        <h1 class="text-2xl font-bold tracking-tight">SnapSpying</h1>
+        <div class="flex items-center gap-6">
+            <button onclick="toggleSheet('privacy-sheet')" class="text-gray-500 font-medium text-sm">Privacy</button>
+            <button onclick="document.body.classList.toggle('light')"><i class="fas fa-sun text-gray-500 text-lg"></i></button>
         </div>
     </header>
 
     <div class="w-full max-w-md mt-6">
-        <p class="text-[15px] font-medium mb-3">Enter the username you want to check</p>
+        <p class="text-sm font-medium mb-3">Enter the username you want to check</p>
+        <div class="flex gap-2 mb-2">
+            <input type="text" id="username" placeholder="Username" class="flex-1 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3.5 outline-none">
+            <button onclick="connect()" id="connBtn" class="bg-[#2c2c2e] text-white px-6 rounded-xl font-bold text-sm">Connect</button>
+        </div>
+        <p id="error" class="hidden text-red-500 text-[10px] mb-4 italic font-bold text-center">Username must be between 4 and 15 characters</p>
         
-        <div class="flex gap-2 mb-10">
-            <input type="text" id="targetUser" placeholder="Username" 
-                class="flex-1 glass-input rounded-xl px-4 py-3.5 outline-none text-[16px] transition-all focus:ring-1 focus:ring-gray-500">
-            <button onclick="connectUser()" id="connectBtn" 
-                class="bg-[#2c2c2e] text-white font-semibold px-6 py-3.5 rounded-xl text-[15px] active:scale-95 transition">
-                Connect
-            </button>
+        <div id="status" class="hidden mb-6 text-[11px] font-bold text-green-500 flex items-center gap-2">
+            <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div> Connected to <span id="targetName"></span>
         </div>
 
-        <div id="actions-grid" class="space-y-3 opacity-40 pointer-events-none transition-opacity duration-500">
-            <div onclick="openSheet('Live Typing', '582,393', 'Watch live typing in real-time')" class="action-card p-4 flex items-center justify-between border border-transparent active:scale-[0.98]">
+        <div id="grid" class="opacity-40 pointer-events-none transition-opacity duration-700">
+            <div onclick="openAction('Live Typing', '582,393', 'Watch live typing in real-time')" class="action-item p-4 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 bg-gray-500/10 flex items-center justify-center rounded-xl">
-                        <i class="fas fa-keyboard text-gray-500 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-[15px]">Live Typing</h3>
-                        <p class="text-[12px] text-gray-500">See what your friend is typing in real-time</p>
-                    </div>
+                    <i class="fas fa-keyboard text-gray-400 text-xl"></i>
+                    <div><h3 class="font-bold text-sm">Live Typing</h3><p class="text-[10px] text-gray-500">See what your friend is typing in real-time</p></div>
                 </div>
                 <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
             </div>
+            </div>
+    </div>
 
-            <div onclick="openSheet('Best Friends', '1,042,110', '8 Best Friends of any user')" class="action-card p-4 flex items-center justify-between active:scale-[0.98]">
-                <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 bg-gray-500/10 flex items-center justify-center rounded-xl">
-                        <i class="fas fa-users text-gray-500 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-[15px]">Reveal Best Friends</h3>
-                        <p class="text-[12px] text-gray-500">8 Best Friends of any user</p>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
+    <div id="privacy-sheet" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60" onclick="toggleSheet('privacy-sheet')"></div>
+        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[30px] p-8 sheet h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">SnapSpying Privacy Policy</h2>
+                <i class="fas fa-times cursor-pointer" onclick="toggleSheet('privacy-sheet')"></i>
             </div>
-            
-            <div onclick="openSheet('Eyes Only', '94,204', 'Access My Eyes Only content')" class="action-card p-4 flex items-center justify-between active:scale-[0.98]">
-                <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 bg-gray-500/10 flex items-center justify-center rounded-xl">
-                        <i class="fas fa-eye text-gray-500 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-[15px]">Reveal Eyes Only</h3>
-                        <p class="text-[12px] text-gray-500">Access My Eyes Only content of any user</p>
-                    </div>
+            <div class="space-y-4 text-xs text-gray-400">
+                <div class="bg-black/20 p-4 rounded-xl">
+                    <h3 class="text-white font-bold mb-2">Information We Collect</h3>
+                    <p>SnapSpying is designed for entertainment purposes only and does not collect or store personal information...</p>
                 </div>
-                <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
-            </div>
+                </div>
         </div>
     </div>
 
-    <div id="sheet-overlay" class="fixed inset-0 bg-black/60 hidden z-40 backdrop-blur-sm" onclick="closeSheet()"></div>
-    <div id="bottom-sheet" class="fixed bottom-0 left-0 right-0 z-50 bottom-sheet flex justify-center">
-        <div class="bg-[#1c1c1e] w-full max-w-md rounded-t-[32px] p-8 privacy-modal shadow-2xl">
-            <div class="w-10 h-1 bg-gray-600 rounded-full mx-auto mb-8"></div>
-            <div class="text-center">
-                <p class="text-2xl font-bold mb-1 tracking-tight" id="s-count">0</p>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-8">Viewed 100+ times</p>
-                
-                <div class="flex justify-center -space-x-4 mb-10">
-                    <img src="https://i.pravatar.cc/100?u=a1" class="w-16 h-16 rounded-full border-[6px] border-[#1c1c1e]">
-                    <img src="https://i.pravatar.cc/100?u=a2" class="w-16 h-16 rounded-full border-[6px] border-[#1c1c1e]">
-                    <img src="https://i.pravatar.cc/100?u=a3" class="w-16 h-16 rounded-full border-[6px] border-[#1c1c1e]">
-                </div>
-
-                <h2 class="text-[20px] font-bold mb-10 px-4" id="s-title">Watch live typing in real-time</h2>
-                
-                <button onclick="startFinalProcess()" class="w-full bg-[#ffd500] text-black font-black py-4 rounded-2xl text-[17px] active:scale-[0.98] transition shadow-lg">
-                    Reveal
-                </button>
+    <div id="reveal-sheet" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60" onclick="closeReveal()"></div>
+        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[30px] p-8 sheet text-center">
+            <div class="w-12 h-1 bg-gray-700 mx-auto mb-6 rounded-full"></div>
+            <h3 id="r-count" class="text-2xl font-bold">0</h3>
+            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-6">Viewed 100+ times</p>
+            <div class="flex justify-center -space-x-4 mb-8">
+                <img src="https://i.pravatar.cc/100?u=1" class="w-14 h-14 rounded-full border-4 border-[var(--card)]">
+                <img src="https://i.pravatar.cc/100?u=2" class="w-14 h-14 rounded-full border-4 border-[var(--card)]">
+                <img src="https://i.pravatar.cc/100?u=3" class="w-14 h-14 rounded-full border-4 border-[var(--card)]">
             </div>
+            <h4 id="r-title" class="text-lg font-bold mb-8"></h4>
+            <button onclick="startHack()" class="w-full bg-[#ffd500] text-black font-black py-4 rounded-2xl">Reveal</button>
         </div>
     </div>
 
-    <div id="proc-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
-        <div class="bg-[#1c1c1e] w-full max-w-sm rounded-[24px] p-8 border border-white/5 privacy-modal">
-            <div class="flex items-center gap-2 mb-8">
-                <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Processing</span>
+    <div id="proc-modal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-[var(--card)] w-full max-w-sm rounded-3xl p-8 text-center">
+            <div class="flex items-center gap-2 mb-6"><div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div><span class="text-[10px] uppercase font-bold text-gray-500">Processing</span></div>
+            <div class="h-1.5 bg-gray-800 rounded-full mb-4 overflow-hidden"><div id="bar" class="bar-fill"></div></div>
+            <h2 id="p-status" class="text-lg font-bold mb-1">Initializing exploit...</h2>
+            <p id="p-log" class="text-[11px] text-gray-500 font-mono italic">Bypassing 2FA Authentication...</p>
+        </div>
+    </div>
+
+    <div id="verify-modal" class="hidden fixed inset-0 z-[70] bg-black flex flex-col items-center justify-center p-8 text-center">
+        <i class="fas fa-lock text-yellow-500 text-5xl mb-6"></i>
+        <h2 class="text-2xl font-bold mb-2">Verification Required</h2>
+        <p class="text-gray-500 text-sm mb-8">Please complete the security check to continue</p>
+        <div class="bg-white/5 border border-white/10 p-6 rounded-2xl w-full max-w-xs">
+            <div class="flex items-center gap-4 mb-4">
+                <input type="checkbox" id="captcha" class="w-6 h-6" onchange="finalOffer()">
+                <label class="text-sm font-bold">I'm not a robot</label>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/RecaptchaLogo.svg" class="w-8 ml-auto">
             </div>
-            <h2 id="p-status" class="text-xl font-bold mb-2">Initializing...</h2>
-            <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden mb-5">
-                <div id="p-bar" class="progress-bar"></div>
-            </div>
-            <p id="p-log" class="text-[12px] text-gray-500 font-mono italic">Searching user database...</p>
         </div>
     </div>
 
     <script>
-        // Theme Toggle
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const icon = document.getElementById('theme-icon');
-            icon.classList.toggle('fa-moon');
-            icon.classList.toggle('fa-sun');
+        function toggleSheet(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+            setTimeout(() => el.querySelector('.sheet').classList.toggle('active'), 10);
         }
 
-        // Connect Logic
-        function connectUser() {
-            const user = document.getElementById('targetUser').value;
-            if(user.length < 3) return alert('Enter valid username');
+        function connect() {
+            const user = document.getElementById('username').value;
+            const err = document.getElementById('error');
+            if(user.length < 4) { err.classList.remove('hidden'); return; }
+            err.classList.add('hidden');
             
-            const btn = document.getElementById('connectBtn');
-            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
-            btn.disabled = true;
-
+            document.getElementById('connBtn').innerHTML = '<i class="fas fa-spinner animate-spin"></i>';
             setTimeout(() => {
-                btn.innerHTML = 'Connected';
-                btn.classList.replace('bg-[#2c2c2e]', 'bg-green-600');
-                document.getElementById('actions-grid').classList.replace('opacity-40', 'opacity-100');
-                document.getElementById('actions-grid').style.pointerEvents = 'auto';
-            }, 1200);
+                document.getElementById('connBtn').style.display = 'none';
+                document.getElementById('status').classList.remove('hidden');
+                document.getElementById('targetName').innerText = '@' + user;
+                document.getElementById('grid').classList.replace('opacity-40', 'opacity-100');
+                document.getElementById('grid').style.pointerEvents = 'auto';
+            }, 1500);
         }
 
-        // Bottom Sheet Logic
-        function openSheet(title, count, desc) {
-            document.getElementById('s-title').innerText = desc;
-            document.getElementById('s-count').innerText = count;
-            document.getElementById('sheet-overlay').classList.remove('hidden');
-            setTimeout(() => document.getElementById('bottom-sheet').classList.add('active'), 10);
+        function openAction(title, count, desc) {
+            document.getElementById('r-title').innerText = desc;
+            document.getElementById('r-count').innerText = count;
+            toggleSheet('reveal-sheet');
         }
 
-        function closeSheet() {
-            document.getElementById('bottom-sheet').classList.remove('active');
-            setTimeout(() => document.getElementById('sheet-overlay').classList.add('hidden'), 300);
-        }
-
-        // Final Hack Animation
-        function startFinalProcess() {
-            closeSheet();
+        function startHack() {
+            toggleSheet('reveal-sheet');
             setTimeout(() => {
                 document.getElementById('proc-modal').classList.remove('hidden');
-                let i = 0;
-                const bar = document.getElementById('p-bar');
-                const status = document.getElementById('p-status');
-                const log = document.getElementById('p-log');
-                
-                const timeline = [
-                    {p: 20, s: 'Processing...', l: 'Initializing SnapSpying exploit...'},
-                    {p: 50, s: 'Bypassing 2FA...', l: 'Handshaking with server nodes...'},
-                    {p: 80, s: 'Compiling display...', l: 'Bypassed successfully!'},
-                    {p: 100, s: 'Success!', l: 'Redirection to verification...'}
-                ];
-
-                const interval = setInterval(() => {
-                    if(i < timeline.length) {
-                        bar.style.width = timeline[i].p + '%';
-                        status.innerText = timeline[i].s;
-                        log.innerText = timeline[i].l;
-                        i++;
-                    } else {
-                        clearInterval(interval);
-                        setTimeout(() => window.location.href = "YOUR_CPA_LINK", 800);
+                let p = 0;
+                const int = setInterval(() => {
+                    p += Math.random() * 15;
+                    document.getElementById('bar').style.width = p + '%';
+                    if(p >= 100) {
+                        clearInterval(int);
+                        document.getElementById('proc-modal').classList.add('hidden');
+                        document.getElementById('verify-modal').classList.remove('hidden');
                     }
-                }, 1500);
-            }, 400);
+                }, 800);
+            }, 500);
         }
 
-        function togglePrivacy() {
-            alert("Privacy Policy Updated: April 2026.");
+        function finalOffer() {
+            setTimeout(() => { window.location.href = "YOUR_CPA_OFFER_LINK"; }, 1000);
         }
     </script>
 </body>
