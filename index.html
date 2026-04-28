@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snapspy - Private Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FFFC00; /* Snapchat Yellow */
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: #000;
+            transition: width 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse { animation: pulse 1.5s infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="mb-8 text-center">
+        <i class="fab fa-snapchat text-6xl text-black"></i>
+        <h1 class="text-3xl font-extrabold text-black mt-2 tracking-tighter">SNAPSPY <span class="bg-black text-white px-2 rounded">PRO</span></h1>
+    </div>
+
+    <div class="w-full max-w-md">
+        <div id="main-box" class="glass-card p-8 transition-all duration-500">
+            
+            <div id="step-1">
+                <h2 class="text-xl font-bold text-center mb-6 text-gray-800">Enter Snapchat Username</h2>
+                <div class="relative mb-6">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-at"></i>
+                    </span>
+                    <input type="text" id="username" placeholder="Username..." 
+                        class="w-full pl-10 pr-4 py-4 border-2 border-gray-100 rounded-xl focus:border-black outline-none transition-all font-semibold">
+                </div>
+                
+                <button onclick="startProcess()" class="w-full bg-black text-white font-bold py-4 rounded-xl shadow-xl hover:opacity-90 transition-all active:scale-95">
+                    CONTINUE
+                </button>
+            </div>
+
+            <div id="step-2" class="hidden text-center py-4">
+                <h2 id="status-text" class="text-lg font-bold mb-4 text-black pulse">Connecting to Servers...</h2>
+                <div class="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-4">
+                    <div id="progress" class="loading-bar"></div>
+                </div>
+                <div id="log-text" class="text-xs text-gray-500 font-mono h-12 overflow-hidden"></div>
+            </div>
+        </div>
+
+        <div class="mt-8 grid grid-cols-3 gap-4 text-center opacity-60">
+            <div>
+                <i class="fas fa-user-secret text-black mb-1"></i>
+                <p class="text-[10px] font-bold uppercase">Anonymous</p>
+            </div>
+            <div>
+                <i class="fas fa-shield-alt text-black mb-1"></i>
+                <p class="text-[10px] font-bold uppercase">Encrypted</p>
+            </div>
+            <div>
+                <i class="fas fa-bolt text-black mb-1"></i>
+                <p class="text-[10px] font-bold uppercase">Fast Server</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startProcess() {
+            const user = document.getElementById('username').value;
+            if(!user) return alert('Please enter a username');
+
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+
+            const status = document.getElementById('status-text');
+            const progress = document.getElementById('progress');
+            const log = document.getElementById('log-text');
+
+            const steps = [
+                {p: 20, t: 'Searching for user @' + user + '...', l: 'Handshaking with API...'},
+                {p: 45, t: 'User Found!', l: 'Extracting private packets...'},
+                {p: 70, t: 'Bypassing Security...', l: 'SSL Encryption bypass... OK'},
+                {p: 90, t: 'Generating Report...', l: 'Compiling logs and media...'},
+                {p: 100, t: 'Human Verification Required', l: 'Finalizing...'}
+            ];
+
+            let current = 0;
+            const interval = setInterval(() => {
+                if(current < steps.length) {
+                    progress.style.width = steps[current].p + '%';
+                    status.innerText = steps[current].t;
+                    log.innerHTML += '> ' + steps[current].l + '<br>';
+                    current++;
+                } else {
+                    clearInterval(interval);
+                    // Hna fin katzid l-offer link dylk
+                    setTimeout(() => {
+                        alert('Final Step: Complete a quick offer to view the data.');
+                        window.location.href = "https://your-offer-link.com"; 
+                    }, 1000);
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
