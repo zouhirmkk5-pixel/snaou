@@ -3,106 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnapSpying - Private Interface</title>
+    <title>SnapSpying - Private Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        :root { --bg: #000; --card: #1c1c1e; --text: #fff; --dim: #8e8e93; --border: #2c2c2e; }
-        .light { --bg: #f2f2f7; --card: #fff; --text: #000; --dim: #636366; --border: #d1d1d6; }
+        :root { --bg: #000; --card: #1c1c1e; --text: #fff; --border: #2c2c2e; }
+        .light { --bg: #f2f2f7; --card: #fff; --text: #000; --border: #d1d1d6; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; overflow-x: hidden; }
         .sheet { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .sheet.active { transform: translateY(0); }
-        .bar-fill { height: 100%; background: #ffd500; width: 0%; transition: width 0.4s; }
-        .action-item { background: var(--card); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
-        .action-item:active { transform: scale(0.98); }
+        .bar-fill { height: 100%; background: #ffd500; width: 0%; transition: width 0.4s linear; }
+        .action-item { background: var(--card); border-radius: 18px; margin-bottom: 12px; cursor: pointer; border: 1px solid transparent; }
+        .action-item:active { transform: scale(0.97); }
     </style>
 </head>
-<body class="flex flex-col items-center px-5 pt-4">
+<body class="flex flex-col items-center px-6 pt-4 min-h-screen">
 
-    <header class="w-full max-w-md flex justify-between items-center py-4">
-        <h1 class="text-2xl font-bold tracking-tight">SnapSpying</h1>
+    <header class="w-full max-w-md flex justify-between items-center py-4 mb-6">
+        <h1 class="text-2xl font-bold tracking-tight">Snap<span class="text-[#ffd500]">Spying</span></h1>
         <div class="flex items-center gap-6">
             <button onclick="toggleSheet('privacy-sheet')" class="text-gray-500 font-medium text-sm">Privacy</button>
-            <button onclick="document.body.classList.toggle('light')"><i class="fas fa-sun text-gray-500 text-lg"></i></button>
+            <button onclick="document.body.classList.toggle('light')"><i id="theme-icon" class="fas fa-sun text-gray-500 text-xl"></i></button>
         </div>
     </header>
 
-    <div class="w-full max-w-md mt-6">
+    <div class="w-full max-w-md">
         <p class="text-sm font-medium mb-3">Enter the username you want to check</p>
         <div class="flex gap-2 mb-2">
-            <input type="text" id="username" placeholder="Username" class="flex-1 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3.5 outline-none">
-            <button onclick="connect()" id="connBtn" class="bg-[#2c2c2e] text-white px-6 rounded-xl font-bold text-sm">Connect</button>
+            <input type="text" id="username" placeholder="Username" class="flex-1 bg-[var(--card)] border border-[var(--border)] rounded-2xl px-4 py-4 outline-none text-sm transition-all focus:border-gray-500">
+            <button onclick="handleConnect()" id="connBtn" class="bg-[#2c2c2e] text-white px-7 rounded-2xl font-bold text-sm transition shadow-lg">Connect</button>
         </div>
-        <p id="error" class="hidden text-red-500 text-[10px] mb-4 italic font-bold text-center">Username must be between 4 and 15 characters</p>
+        <p id="error-msg" class="hidden text-[#ff3b30] text-[12px] mb-4 font-semibold">Username must be between 4 and 15 characters</p>
         
-        <div id="status" class="hidden mb-6 text-[11px] font-bold text-green-500 flex items-center gap-2">
-            <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div> Connected to <span id="targetName"></span>
+        <div id="conn-status" class="hidden mb-6 flex items-center gap-2">
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-[12px] font-bold text-green-500">Connected to <span id="targetName"></span></span>
         </div>
 
-        <div id="grid" class="opacity-40 pointer-events-none transition-opacity duration-700">
-            <div onclick="openAction('Live Typing', '582,393', 'Watch live typing in real-time')" class="action-item p-4 flex items-center justify-between">
+        <div id="actions-grid" class="opacity-40 pointer-events-none transition-opacity duration-700 space-y-3">
+            <div onclick="openAction('Live Typing', '582,393', 'Watch live typing in real-time', 1)" class="action-item p-5 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <i class="fas fa-keyboard text-gray-400 text-xl"></i>
-                    <div><h3 class="font-bold text-sm">Live Typing</h3><p class="text-[10px] text-gray-500">See what your friend is typing in real-time</p></div>
+                    <div class="w-10 h-10 bg-gray-500/10 flex items-center justify-center rounded-xl"><i class="fas fa-keyboard text-gray-500"></i></div>
+                    <div><h3 class="font-bold text-[15px]">Live Typing</h3><p class="text-[11px] text-gray-500">See what your friend is typing in real-time</p></div>
                 </div>
                 <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
             </div>
+
+            <div onclick="openAction('Best Friends', '1,042,100', '8 Best Friends of any user', 2)" class="action-item p-5 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-gray-500/10 flex items-center justify-center rounded-xl"><i class="fas fa-user-group text-gray-500"></i></div>
+                    <div><h3 class="font-bold text-[15px]">Reveal Best Friends</h3><p class="text-[11px] text-gray-500">8 Best Friends of any user</p></div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
             </div>
+
+            <div onclick="openAction('Eyes Only', '94,204', 'Access My Eyes Only content', 3)" class="action-item p-5 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-gray-500/10 flex items-center justify-center rounded-xl"><i class="fas fa-eye text-gray-500 text-xl"></i></div>
+                    <div><h3 class="font-bold text-[15px]">Reveal Eyes Only</h3><p class="text-[11px] text-gray-500">Access My Eyes Only content of any user</p></div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
+            </div>
+
+            <div onclick="openAction('Chat History', '215,902', 'Message history of any user', 4)" class="action-item p-5 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-gray-500/10 flex items-center justify-center rounded-xl"><i class="fas fa-comment-dots text-gray-500 text-xl"></i></div>
+                    <div><h3 class="font-bold text-[15px]">Reveal Chat History</h3><p class="text-[11px] text-gray-500 leading-tight">Message history including sent, received...</p></div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-700 text-xs"></i>
+            </div>
+        </div>
     </div>
 
     <div id="privacy-sheet" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60" onclick="toggleSheet('privacy-sheet')"></div>
-        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[30px] p-8 sheet h-[80vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleSheet('privacy-sheet')"></div>
+        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[35px] p-8 sheet h-[85vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center mb-8 sticky top-0 bg-[var(--card)] py-2">
                 <h2 class="text-xl font-bold">SnapSpying Privacy Policy</h2>
-                <i class="fas fa-times cursor-pointer" onclick="toggleSheet('privacy-sheet')"></i>
+                <button onclick="toggleSheet('privacy-sheet')" class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div class="space-y-4 text-xs text-gray-400">
-                <div class="bg-black/20 p-4 rounded-xl">
+            <div class="space-y-6 text-sm text-gray-400 leading-relaxed">
+                <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
                     <h3 class="text-white font-bold mb-2">Information We Collect</h3>
-                    <p>SnapSpying is designed for entertainment purposes only and does not collect or store personal information...</p>
+                    <p>SnapSpying is designed for entertainment purposes only and does not collect or store any personal information...</p>
                 </div>
+                <div class="bg-black/20 p-5 rounded-2xl border border-white/5">
+                    <h3 class="text-white font-bold mb-2">How We Use Your Information</h3>
+                    <p>The platform simulates processing but does not perform any actual data retrieval or analysis.</p>
                 </div>
-        </div>
-    </div>
-
-    <div id="reveal-sheet" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/60" onclick="closeReveal()"></div>
-        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[30px] p-8 sheet text-center">
-            <div class="w-12 h-1 bg-gray-700 mx-auto mb-6 rounded-full"></div>
-            <h3 id="r-count" class="text-2xl font-bold">0</h3>
-            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-6">Viewed 100+ times</p>
-            <div class="flex justify-center -space-x-4 mb-8">
-                <img src="https://i.pravatar.cc/100?u=1" class="w-14 h-14 rounded-full border-4 border-[var(--card)]">
-                <img src="https://i.pravatar.cc/100?u=2" class="w-14 h-14 rounded-full border-4 border-[var(--card)]">
-                <img src="https://i.pravatar.cc/100?u=3" class="w-14 h-14 rounded-full border-4 border-[var(--card)]">
             </div>
-            <h4 id="r-title" class="text-lg font-bold mb-8"></h4>
-            <button onclick="startHack()" class="w-full bg-[#ffd500] text-black font-black py-4 rounded-2xl">Reveal</button>
         </div>
     </div>
 
-    <div id="proc-modal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
-        <div class="bg-[var(--card)] w-full max-w-sm rounded-3xl p-8 text-center">
-            <div class="flex items-center gap-2 mb-6"><div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div><span class="text-[10px] uppercase font-bold text-gray-500">Processing</span></div>
-            <div class="h-1.5 bg-gray-800 rounded-full mb-4 overflow-hidden"><div id="bar" class="bar-fill"></div></div>
-            <h2 id="p-status" class="text-lg font-bold mb-1">Initializing exploit...</h2>
-            <p id="p-log" class="text-[11px] text-gray-500 font-mono italic">Bypassing 2FA Authentication...</p>
+    <div id="action-sheet" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeActionSheet()"></div>
+        <div class="absolute bottom-0 w-full bg-[var(--card)] rounded-t-[35px] p-10 sheet text-center">
+            <div class="w-10 h-1 bg-gray-700 mx-auto mb-8 rounded-full"></div>
+            <h3 id="r-count" class="text-3xl font-bold mb-1">0</h3>
+            <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-10">Viewed 100+ times</p>
+            <div class="flex justify-center -space-x-5 mb-10" id="avatar-stack"></div>
+            <h4 id="r-title" class="text-[18px] font-bold mb-10 px-6"></h4>
+            <button onclick="runExploit()" class="w-full bg-[#ffd500] text-black font-black py-4 rounded-2xl text-lg shadow-lg active:scale-95 transition">Reveal</button>
         </div>
     </div>
 
-    <div id="verify-modal" class="hidden fixed inset-0 z-[70] bg-black flex flex-col items-center justify-center p-8 text-center">
-        <i class="fas fa-lock text-yellow-500 text-5xl mb-6"></i>
+    <div id="proc-modal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-xl flex items-center justify-center p-8">
+        <div class="bg-[var(--card)] w-full max-w-sm rounded-[35px] p-8 text-left border border-white/5 shadow-2xl">
+            <div class="flex items-center gap-2 mb-8">
+                <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] uppercase font-black text-gray-500 tracking-widest">Processing</span>
+                <span id="p-percent" class="ml-auto text-[#ffd500] font-bold">0%</span>
+            </div>
+            <h2 id="p-status" class="text-xl font-bold mb-3">Initializing exploit...</h2>
+            <div class="h-2 bg-gray-800 rounded-full mb-6 overflow-hidden"><div id="bar" class="bar-fill"></div></div>
+            <p id="p-log" class="text-[12px] text-gray-500 font-mono italic">Handshaking with Snapchat servers...</p>
+        </div>
+    </div>
+
+    <div id="verify-modal" class="hidden fixed inset-0 z-[70] bg-[#000] flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-20 h-20 bg-[#ffd500]/10 rounded-full flex items-center justify-center mb-8 border border-[#ffd500]/20">
+            <i class="fas fa-lock text-[#ffd500] text-4xl"></i>
+        </div>
         <h2 class="text-2xl font-bold mb-2">Verification Required</h2>
-        <p class="text-gray-500 text-sm mb-8">Please complete the security check to continue</p>
-        <div class="bg-white/5 border border-white/10 p-6 rounded-2xl w-full max-w-xs">
-            <div class="flex items-center gap-4 mb-4">
-                <input type="checkbox" id="captcha" class="w-6 h-6" onchange="finalOffer()">
-                <label class="text-sm font-bold">I'm not a robot</label>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/RecaptchaLogo.svg" class="w-8 ml-auto">
+        <p class="text-gray-500 text-sm mb-12 px-6">Please complete the security check to continue</p>
+        <div class="bg-white/[0.03] border border-white/10 p-6 rounded-[25px] w-full max-w-xs flex items-center shadow-xl">
+            <div class="flex items-center gap-4 w-full">
+                <div class="relative w-7 h-7">
+                    <input type="checkbox" onchange="finalStep()" class="w-7 h-7 rounded-md appearance-none border-2 border-gray-600 checked:bg-blue-500 transition-all cursor-pointer">
+                    <i class="fas fa-check absolute inset-0 text-white text-[10px] flex items-center justify-center opacity-0 pointer-events-none"></i>
+                </div>
+                <label class="text-[15px] font-medium text-gray-300">I'm not a robot</label>
+                <div class="ml-auto flex flex-col items-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/RecaptchaLogo.svg" class="w-8">
+                    <span class="text-[8px] text-gray-600 mt-1 uppercase font-bold">Privacy</span>
+                </div>
             </div>
         </div>
+        <p class="text-[10px] text-gray-700 mt-8 font-bold flex items-center gap-2">
+            <i class="fas fa-info-circle"></i> This confirms you're human and protects the system
+        </p>
     </div>
 
     <script>
@@ -112,47 +152,92 @@
             setTimeout(() => el.querySelector('.sheet').classList.toggle('active'), 10);
         }
 
-        function connect() {
+        function handleConnect() {
             const user = document.getElementById('username').value;
-            const err = document.getElementById('error');
+            const btn = document.getElementById('connBtn');
+            const err = document.getElementById('error-msg');
+            
             if(user.length < 4) { err.classList.remove('hidden'); return; }
             err.classList.add('hidden');
             
-            document.getElementById('connBtn').innerHTML = '<i class="fas fa-spinner animate-spin"></i>';
+            if(btn.innerText === "Disconnect") {
+                location.reload();
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
+            btn.disabled = true;
+
             setTimeout(() => {
-                document.getElementById('connBtn').style.display = 'none';
+                btn.disabled = false;
+                btn.innerText = "Disconnect";
+                btn.classList.replace('bg-[#2c2c2e]', 'bg-[#ff3b30]');
                 document.getElementById('status').classList.remove('hidden');
+                document.getElementById('conn-status').classList.remove('hidden');
                 document.getElementById('targetName').innerText = '@' + user;
-                document.getElementById('grid').classList.replace('opacity-40', 'opacity-100');
-                document.getElementById('grid').style.pointerEvents = 'auto';
-            }, 1500);
+                document.getElementById('actions-grid').classList.replace('opacity-40', 'opacity-100');
+                document.getElementById('actions-grid').style.pointerEvents = 'auto';
+            }, 1800);
         }
 
-        function openAction(title, count, desc) {
+        function openAction(title, count, desc, type) {
+            const stack = document.getElementById('avatar-stack');
+            stack.innerHTML = '';
+            for(let i=1; i<=3; i++) {
+                stack.innerHTML += `<img src="https://i.pravatar.cc/150?u=${type}${i}" class="w-16 h-16 rounded-full border-[6px] border-[var(--card)] shadow-xl">`;
+            }
             document.getElementById('r-title').innerText = desc;
             document.getElementById('r-count').innerText = count;
-            toggleSheet('reveal-sheet');
+            toggleSheet('action-sheet');
         }
 
-        function startHack() {
-            toggleSheet('reveal-sheet');
+        function closeActionSheet() { toggleSheet('action-sheet'); }
+
+        function runExploit() {
+            closeActionSheet();
             setTimeout(() => {
                 document.getElementById('proc-modal').classList.remove('hidden');
                 let p = 0;
-                const int = setInterval(() => {
-                    p += Math.random() * 15;
-                    document.getElementById('bar').style.width = p + '%';
-                    if(p >= 100) {
-                        clearInterval(int);
-                        document.getElementById('proc-modal').classList.add('hidden');
-                        document.getElementById('verify-modal').classList.remove('hidden');
+                const bar = document.getElementById('bar');
+                const percent = document.getElementById('p-percent');
+                const status = document.getElementById('p-status');
+                const log = document.getElementById('p-log');
+                
+                const steps = [
+                    {p: 25, s: 'Bypassing 2FA...', l: 'Initializing SnapSpying exploit...'},
+                    {p: 50, s: '2FA Bypassed!', l: 'Injecting security tokens...'},
+                    {p: 75, s: 'Compiling display...', l: 'Downloading user cache...'},
+                    {p: 100, s: 'Success!', l: 'Finalizing verification protocol...'}
+                ];
+
+                let stepIdx = 0;
+                const interval = setInterval(() => {
+                    p += 1;
+                    bar.style.width = p + '%';
+                    percent.innerText = p + '%';
+                    
+                    if(p >= steps[stepIdx].p) {
+                        status.innerText = steps[stepIdx].s;
+                        log.innerText = steps[stepIdx].l;
+                        stepIdx = Math.min(stepIdx + 1, steps.length - 1);
                     }
-                }, 800);
+
+                    if(p >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            document.getElementById('proc-modal').classList.add('hidden');
+                            document.getElementById('verify-modal').classList.remove('hidden');
+                        }, 800);
+                    }
+                }, 40);
             }, 500);
         }
 
-        function finalOffer() {
-            setTimeout(() => { window.location.href = "YOUR_CPA_OFFER_LINK"; }, 1000);
+        function finalStep() {
+            setTimeout(() => {
+                // Hna lo7 l-link dyal CPA Building dylk awla Offer
+                window.location.href = "https://your-cpa-link-here.com"; 
+            }, 500);
         }
     </script>
 </body>
